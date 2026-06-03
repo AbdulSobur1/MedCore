@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { getRoleHome, SUPER_ADMIN } from '@/lib/auth'
 import type { PatientProfile, StaffProfile } from '@/lib/auth'
 
 type LoginStep = 'email' | 'verify' | 'password'
@@ -91,6 +92,12 @@ export default function LoginPage() {
       }
 
       // OTP verified, get patient data and create session
+      if (email === SUPER_ADMIN.email) {
+        setUserType('staff')
+        setStep('password')
+        return
+      }
+
       const patients = JSON.parse(localStorage.getItem('patients') || '{}') as StoredPatients
       const patient = Object.values(patients).find((p) => p.email === email)
 
@@ -124,6 +131,27 @@ export default function LoginPage() {
     try {
       if (!password) {
         throw new Error('Please enter your password')
+      }
+
+      if (email === SUPER_ADMIN.email) {
+        if (password !== SUPER_ADMIN.password) {
+          throw new Error('Incorrect password')
+        }
+
+        const token = Math.random().toString(36).substr(2)
+        login({
+          userType: 'staff',
+          userId: SUPER_ADMIN.id,
+          email: SUPER_ADMIN.email,
+          name: SUPER_ADMIN.name,
+          role: SUPER_ADMIN.role,
+          isHeadAdmin: true,
+          token,
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+        })
+
+        router.push('/admin/dashboard')
+        return
       }
 
       if (userType === 'patient') {
@@ -173,7 +201,7 @@ export default function LoginPage() {
           expiresAt: Date.now() + 24 * 60 * 60 * 1000,
         })
 
-        router.push('/staff/dashboard')
+        router.push(getRoleHome(staff.role))
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')

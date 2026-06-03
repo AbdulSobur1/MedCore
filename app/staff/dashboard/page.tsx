@@ -12,18 +12,54 @@ import { PharmacySection } from '@/components/pharmacy-section'
 import { BillingSection } from '@/components/billing-section'
 import { ReportsSection } from '@/components/reports-section'
 import { AdminSection } from '@/components/admin-section'
+import type { StaffProfile } from '@/lib/auth'
+
+type StoredStaffProfile = StaffProfile & { password?: string }
 
 export default function StaffDashboard() {
   const router = useRouter()
   const { session, logout, isLoading } = useAuth()
   const [activeSection, setActiveSection] = useState('dashboard')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const [effectiveIsHeadAdmin, setEffectiveIsHeadAdmin] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !session) {
       router.push('/auth/landing')
     }
   }, [session, isLoading, router])
+
+  useEffect(() => {
+    if (!session || session.userType !== 'staff' || session.role !== 'admin') {
+      setEffectiveIsHeadAdmin(false)
+      return
+    }
+
+    queueMicrotask(() => {
+      const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as Record<string, StoredStaffProfile>
+      const staffEntries = Object.entries(staffProfiles)
+      const admins = staffEntries.filter(([, staff]) => staff.role === 'admin')
+      const hasHeadAdmin = admins.some(([, staff]) => staff.isHeadAdmin)
+      const currentEntry = staffEntries.find(([id, staff]) => id === session.userId || staff.email === session.email)
+      const currentStaff = currentEntry?.[1]
+
+      if (currentStaff?.isHeadAdmin || session.isHeadAdmin) {
+        setEffectiveIsHeadAdmin(true)
+        return
+      }
+
+      if (!hasHeadAdmin && currentEntry) {
+        const [currentId, currentProfile] = currentEntry
+        staffProfiles[currentId] = { ...currentProfile, isHeadAdmin: true }
+        localStorage.setItem('staffProfiles', JSON.stringify(staffProfiles))
+        localStorage.setItem('medcore_session', JSON.stringify({ ...session, isHeadAdmin: true }))
+        setEffectiveIsHeadAdmin(true)
+        return
+      }
+
+      setEffectiveIsHeadAdmin(false)
+    })
+  }, [session])
 
   if (isLoading || !session) {
     return (
@@ -96,7 +132,7 @@ export default function StaffDashboard() {
       case 'reports':
         return <ReportsSection />
       case 'admin':
-        return <AdminSection isHeadAdmin={session.isHeadAdmin} />
+        return <AdminSection isHeadAdmin={effectiveIsHeadAdmin} currentAdminEmail={session.email} />
       default:
         return <DashboardSection />
     }

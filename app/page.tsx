@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { Loader } from 'lucide-react'
+import { getRoleHome } from '@/lib/auth'
 
 export default function Home() {
   const router = useRouter()
@@ -16,7 +17,7 @@ export default function Home() {
       if (session.userType === 'patient') {
         router.push('/patient/dashboard')
       } else if (session.userType === 'staff') {
-        router.push('/staff/dashboard')
+        router.push(getRoleHome(session.role))
       }
     } else {
       router.push('/auth/landing')

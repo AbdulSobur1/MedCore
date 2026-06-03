@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Session, getSession, setSession, clearSession } from './auth'
+import { Session, getSession, setSession, clearSession, initializeSuperAdmin } from './auth'
 
 interface AuthContextType {
   session: Session | null
@@ -20,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     queueMicrotask(() => {
+      initializeSuperAdmin()
       const session = getSession()
       setSessionState(session)
       setIsLoading(false)

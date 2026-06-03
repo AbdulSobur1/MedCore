@@ -1,6 +1,27 @@
 // Auth types
 export type UserRole = 'patient' | 'doctor' | 'pharmacist' | 'receptionist' | 'accountant' | 'admin'
 
+export const SUPER_ADMIN = {
+  email: 'abdullahabdulsobur@gmail.com',
+  password: 'Abdulsobur1',
+  name: 'Abdulsobur (Super Admin)',
+  role: 'admin' as const,
+  id: 'super-admin-001',
+}
+
+export const ROLE_HOME: Record<UserRole, string> = {
+  admin: '/admin/dashboard',
+  doctor: '/doctor/dashboard',
+  receptionist: '/receptionist/dashboard',
+  pharmacist: '/pharmacy/dashboard',
+  accountant: '/billing/dashboard',
+  patient: '/patient/dashboard',
+}
+
+export function getRoleHome(role?: UserRole): string {
+  return role ? ROLE_HOME[role] : '/auth/landing'
+}
+
 export interface PatientProfile {
   patientId: string
   email: string
@@ -90,6 +111,37 @@ export function setSession(session: Session): void {
 export function clearSession(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem('medcore_session')
+}
+
+export function initializeSuperAdmin(): void {
+  if (typeof window === 'undefined') return
+
+  const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as Record<string, StaffProfile & { password?: string }>
+  const existingEntry = Object.entries(staffProfiles).find(([, staff]) => staff.email === SUPER_ADMIN.email)
+
+  if (existingEntry) {
+    const [staffId, staff] = existingEntry
+    if (!staff.isHeadAdmin) {
+      staffProfiles[staffId] = { ...staff, isHeadAdmin: true, isActive: true }
+      localStorage.setItem('staffProfiles', JSON.stringify(staffProfiles))
+    }
+    return
+  }
+
+  staffProfiles[SUPER_ADMIN.id] = {
+    staffId: SUPER_ADMIN.id,
+    email: SUPER_ADMIN.email,
+    name: SUPER_ADMIN.name,
+    role: SUPER_ADMIN.role,
+    password: SUPER_ADMIN.password,
+    department: 'Administration',
+    phone: '',
+    createdAt: new Date().toISOString(),
+    isActive: true,
+    isHeadAdmin: true,
+  }
+
+  localStorage.setItem('staffProfiles', JSON.stringify(staffProfiles))
 }
 
 // Mock data storage (in production, would be database)
