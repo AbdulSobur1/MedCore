@@ -16,13 +16,16 @@ end $$;
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   email text not null unique,
-  password_hash text not null,
+  password_hash text,
   name text not null,
   role user_role not null,
   phone text,
   department text,
   is_active boolean not null default true,
   is_head_admin boolean not null default false,
+  otp_hash text,
+  otp_expiry timestamptz,
+  email_verified boolean not null default false,
   created_at timestamptz not null default now(),
   last_login_at timestamptz
 );
