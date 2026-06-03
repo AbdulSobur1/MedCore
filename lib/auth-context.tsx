@@ -19,9 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const session = getSession()
-    setSessionState(session)
-    setIsLoading(false)
+    queueMicrotask(() => {
+      const session = getSession()
+      setSessionState(session)
+      setIsLoading(false)
+    })
   }, [])
 
   const login = (newSession: Session) => {

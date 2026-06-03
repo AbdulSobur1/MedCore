@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import type { PatientProfile, StaffProfile } from '@/lib/auth'
 
 type LoginStep = 'email' | 'verify' | 'password'
+type StoredPatients = Record<string, PatientProfile>
+type StoredStaffProfile = StaffProfile & { password: string }
+type StoredStaffProfiles = Record<string, StoredStaffProfile>
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,11 +25,11 @@ export default function LoginPage() {
 
   // Simulate checking if email is patient or staff
   const checkUserType = (emailAddress: string) => {
-    const patients = JSON.parse(localStorage.getItem('patients') || '{}')
-    const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}')
+    const patients = JSON.parse(localStorage.getItem('patients') || '{}') as StoredPatients
+    const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as StoredStaffProfiles
     
-    const isPatient = Object.values(patients as any).some((p: any) => p.email === emailAddress)
-    const isStaff = Object.values(staffProfiles as any).some((s: any) => s.email === emailAddress)
+    const isPatient = Object.values(patients).some((p) => p.email === emailAddress)
+    const isStaff = Object.values(staffProfiles).some((s) => s.email === emailAddress)
     
     if (isPatient) return 'patient'
     if (isStaff) return 'staff'
@@ -81,8 +85,8 @@ export default function LoginPage() {
       }
 
       // OTP verified, get patient data and create session
-      const patients = JSON.parse(localStorage.getItem('patients') || '{}')
-      const patient = Object.values(patients as any).find((p: any) => p.email === email)
+      const patients = JSON.parse(localStorage.getItem('patients') || '{}') as StoredPatients
+      const patient = Object.values(patients).find((p) => p.email === email)
 
       if (!patient) {
         throw new Error('Patient not found')
@@ -116,8 +120,8 @@ export default function LoginPage() {
         throw new Error('Please enter your password')
       }
 
-      const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}')
-      const staff = Object.values(staffProfiles as any).find((s: any) => s.email === email)
+      const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as StoredStaffProfiles
+      const staff = Object.values(staffProfiles).find((s) => s.email === email)
 
       if (!staff) {
         throw new Error('Staff profile not found')

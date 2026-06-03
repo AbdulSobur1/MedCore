@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader, Eye, EyeOff } from 'lucide-react'
@@ -9,6 +9,25 @@ import { generateStaffId } from '@/lib/auth'
 const ADMIN_SECRET_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || 'medcore-admin-2024'
 
 export default function AdminRegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="w-full max-w-md glass-card p-8">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-light tracking-tight text-foreground">Admin Access</h1>
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <AdminRegisterContent />
+    </Suspense>
+  )
+}
+
+function AdminRegisterContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
