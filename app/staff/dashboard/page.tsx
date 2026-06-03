@@ -31,7 +31,7 @@ export default function StaffDashboard() {
 
   useEffect(() => {
     if (!session || session.userType !== 'staff' || session.role !== 'admin') {
-      setEffectiveIsHeadAdmin(false)
+      queueMicrotask(() => setEffectiveIsHeadAdmin(false))
       return
     }
 
@@ -132,7 +132,7 @@ export default function StaffDashboard() {
       case 'reports':
         return <ReportsSection />
       case 'admin':
-        return <AdminSection isHeadAdmin={effectiveIsHeadAdmin} currentAdminEmail={session.email} />
+        return <AdminSection isHeadAdmin={effectiveIsHeadAdmin} />
       default:
         return <DashboardSection />
     }
