@@ -53,12 +53,18 @@ export default function LoginPage() {
 
       setUserType(detectedType)
       
-      // Mock: Generate OTP for patients, ask for password for staff
+      // Patients created after the password update use password login.
       if (detectedType === 'patient') {
-        const otp = Math.floor(100000 + Math.random() * 900000).toString()
-        localStorage.setItem(`otp_${email}`, otp)
-        console.log('[v0] OTP for demo:', otp)
-        setStep('verify')
+        const patients = JSON.parse(localStorage.getItem('patients') || '{}') as StoredPatients
+        const patient = Object.values(patients).find((p) => p.email === email)
+        if (patient?.password) {
+          setStep('password')
+        } else {
+          const otp = Math.floor(100000 + Math.random() * 900000).toString()
+          localStorage.setItem(`otp_${email}`, otp)
+          console.log('[v0] OTP for demo:', otp)
+          setStep('verify')
+        }
       } else {
         setStep('password')
       }
@@ -120,30 +126,55 @@ export default function LoginPage() {
         throw new Error('Please enter your password')
       }
 
-      const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as StoredStaffProfiles
-      const staff = Object.values(staffProfiles).find((s) => s.email === email)
+      if (userType === 'patient') {
+        const patients = JSON.parse(localStorage.getItem('patients') || '{}') as StoredPatients
+        const patient = Object.values(patients).find((p) => p.email === email)
 
-      if (!staff) {
-        throw new Error('Staff profile not found')
+        if (!patient) {
+          throw new Error('Patient not found')
+        }
+
+        if (password !== patient.password) {
+          throw new Error('Incorrect password')
+        }
+
+        const token = Math.random().toString(36).substr(2)
+        login({
+          userType: 'patient',
+          userId: patient.patientId,
+          email: patient.email,
+          name: patient.name,
+          token,
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+        })
+
+        router.push('/patient/dashboard')
+      } else {
+        const staffProfiles = JSON.parse(localStorage.getItem('staffProfiles') || '{}') as StoredStaffProfiles
+        const staff = Object.values(staffProfiles).find((s) => s.email === email)
+
+        if (!staff) {
+          throw new Error('Staff profile not found')
+        }
+
+        if (password !== staff.password) {
+          throw new Error('Incorrect password')
+        }
+
+        const token = Math.random().toString(36).substr(2)
+        login({
+          userType: 'staff',
+          userId: staff.staffId,
+          email: staff.email,
+          name: staff.name,
+          role: staff.role,
+          isHeadAdmin: staff.isHeadAdmin,
+          token,
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+        })
+
+        router.push('/staff/dashboard')
       }
-
-      // Mock password check
-      if (password !== staff.password) {
-        throw new Error('Incorrect password')
-      }
-
-      const token = Math.random().toString(36).substr(2)
-      login({
-        userType: 'staff',
-        userId: staff.staffId,
-        email: staff.email,
-        name: staff.name,
-        role: staff.role,
-        token,
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      })
-
-      router.push('/staff/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -167,7 +198,7 @@ export default function LoginPage() {
         <div className="space-y-2 mb-8">
           <h1 className="text-3xl font-light tracking-tight text-foreground">Login</h1>
           <p className="text-sm text-muted-foreground">
-            {step === 'email' ? 'Enter your email to get started' : step === 'verify' ? 'Enter the OTP sent to your email' : 'Enter your password'}
+            {step === 'email' ? 'Enter your email to get started' : step === 'verify' ? 'Enter the OTP sent to your email' : `Enter your ${userType === 'patient' ? 'patient' : 'staff'} password`}
           </p>
         </div>
 

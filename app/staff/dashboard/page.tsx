@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { LogOut, Users, Calendar, Pill, DollarSign, FileText } from 'lucide-react'
+import { LogOut, Users, Calendar, Pill, DollarSign, FileText, Menu, X } from 'lucide-react'
 import { DashboardSection } from '@/components/dashboard-section'
 import { PatientsSection } from '@/components/patients-section'
 import { AppointmentsSection } from '@/components/appointments-section'
@@ -17,6 +17,7 @@ export default function StaffDashboard() {
   const router = useRouter()
   const { session, logout, isLoading } = useAuth()
   const [activeSection, setActiveSection] = useState('dashboard')
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !session) {
@@ -95,18 +96,53 @@ export default function StaffDashboard() {
       case 'reports':
         return <ReportsSection />
       case 'admin':
-        return <AdminSection />
+        return <AdminSection isHeadAdmin={session.isHeadAdmin} />
       default:
         return <DashboardSection />
     }
   }
 
   const sections = getAvailableSections()
+  const activeSectionLabel = sections.find((section) => section.id === activeSection)?.label || 'Dashboard'
+
+  const handleNavigate = (sectionId: string) => {
+    setActiveSection(sectionId)
+    setIsMobileNavOpen(false)
+  }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-background lg:flex">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/50 bg-card px-4 py-3 lg:hidden">
+        <div>
+          <p className="text-xs text-muted-foreground">MedCore Staff</p>
+          <h1 className="text-lg font-semibold text-foreground">{activeSectionLabel}</h1>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsMobileNavOpen((open) => !open)}
+          className="glass-sm inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground"
+          aria-label="Toggle navigation"
+          aria-expanded={isMobileNavOpen}
+        >
+          {isMobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </header>
+
+      {isMobileNavOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          className="fixed inset-0 z-30 bg-black/20 lg:hidden"
+          onClick={() => setIsMobileNavOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-full lg:w-64 bg-sidebar border-b lg:border-b-0 lg:border-r border-white/50 p-4 lg:p-6">
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-72 max-w-[82vw] bg-sidebar border-r border-white/50 p-4 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:w-64 lg:max-w-none lg:translate-x-0 lg:p-6 ${
+          isMobileNavOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="space-y-6">
           {/* Header */}
           <div>
@@ -129,7 +165,7 @@ export default function StaffDashboard() {
               return (
                 <button
                   key={section.id}
-                  onClick={() => setActiveSection(section.id)}
+                  onClick={() => handleNavigate(section.id)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
                     isActive
                       ? 'bg-primary text-primary-foreground'

@@ -5,6 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader, Eye, EyeOff } from 'lucide-react'
 import { generateStaffId } from '@/lib/auth'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const ADMIN_SECRET_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || 'medcore-admin-2024'
 
@@ -32,6 +40,7 @@ function AdminRegisterContent() {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [createdAdminEmail, setCreatedAdminEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [authorized, setAuthorized] = useState(false)
   const [adminKey, setAdminKey] = useState(searchParams.get('key') || '')
@@ -95,13 +104,12 @@ function AdminRegisterContent() {
         phone: '',
         createdAt: new Date().toISOString(),
         isActive: true,
+        isHeadAdmin: true,
       }
 
       staffProfiles[staffId] = newAdmin
       localStorage.setItem('staffProfiles', JSON.stringify(staffProfiles))
-
-      alert(`Admin account created successfully!\n\nEmail: ${formData.email}\n\nYou can now login with your credentials.`)
-      router.push('/auth/login')
+      setCreatedAdminEmail(formData.email)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -158,6 +166,29 @@ function AdminRegisterContent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Dialog open={!!createdAdminEmail} onOpenChange={(open) => !open && router.push('/auth/login')}>
+        <DialogContent className="glass-card">
+          <DialogHeader>
+            <DialogTitle>Head Admin Created</DialogTitle>
+            <DialogDescription>
+              This account can manage staff and create other administrator accounts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-white/50 bg-muted p-4">
+            <p className="text-xs font-medium text-muted-foreground">Admin Email</p>
+            <p className="mt-1 break-all font-medium text-foreground">{createdAdminEmail}</p>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => router.push('/auth/login')}
+              className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+            >
+              Continue to Login
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="w-full max-w-md glass-card p-8">
         <Link
           href="/auth/landing"

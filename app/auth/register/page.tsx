@@ -5,14 +5,25 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader } from 'lucide-react'
 import { generatePatientId } from '@/lib/auth'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [createdPatientId, setCreatedPatientId] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     phone: '',
     dateOfBirth: '',
     gender: 'M' as const,
@@ -33,8 +44,16 @@ export default function RegisterPage() {
 
     try {
       // Validate required fields
-      if (!formData.name || !formData.email || !formData.phone || !formData.dateOfBirth) {
+      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.dateOfBirth) {
         throw new Error('Please fill in all required fields')
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match')
+      }
+
+      if (formData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters')
       }
 
       // Generate patient ID
@@ -51,15 +70,20 @@ export default function RegisterPage() {
 
       patients[patientId] = {
         patientId,
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        bloodType: formData.bloodType,
+        address: formData.address,
+        emergencyContact: formData.emergencyContact,
         createdAt: new Date().toISOString(),
       }
 
       localStorage.setItem('patients', JSON.stringify(patients))
-
-      // Show success and redirect to login
-      alert(`Registration successful! Your Patient ID is: ${patientId}\n\nPlease save this ID. You'll use your email to login.`)
-      router.push('/auth/login')
+      setCreatedPatientId(patientId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -69,6 +93,29 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Dialog open={!!createdPatientId} onOpenChange={(open) => !open && router.push('/auth/login')}>
+        <DialogContent className="glass-card">
+          <DialogHeader>
+            <DialogTitle>Registration Complete</DialogTitle>
+            <DialogDescription>
+              Your patient profile has been created. Save this Patient ID for hospital records.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-white/50 bg-muted p-4">
+            <p className="text-xs font-medium text-muted-foreground">Patient ID</p>
+            <p className="mt-1 break-all font-mono text-lg font-semibold text-foreground">{createdPatientId}</p>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => router.push('/auth/login')}
+              className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+            >
+              Continue to Login
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="w-full max-w-md glass-card p-8">
         {/* Back Button */}
         <Link
@@ -116,6 +163,33 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="john@example.com"
+              className="w-full px-4 py-2 rounded-lg bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-2">Password *</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Create a password"
+              className="w-full px-4 py-2 rounded-lg bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-2">Confirm Password *</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
               className="w-full px-4 py-2 rounded-lg bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               required
             />

@@ -4,6 +4,7 @@ export type UserRole = 'patient' | 'doctor' | 'pharmacist' | 'receptionist' | 'a
 export interface PatientProfile {
   patientId: string
   email: string
+  password?: string
   name: string
   phone: string
   dateOfBirth: string
@@ -25,6 +26,7 @@ export interface StaffProfile {
   invitedAt?: string
   acceptedAt?: string
   isActive: boolean
+  isHeadAdmin?: boolean
 }
 
 export interface Session {
@@ -33,6 +35,7 @@ export interface Session {
   email: string
   name: string
   role?: UserRole
+  isHeadAdmin?: boolean
   token: string
   expiresAt: number
 }
@@ -118,6 +121,7 @@ export function initializeMockAdmin(): void {
     department: 'Administration',
     createdAt: new Date().toISOString(),
     isActive: true,
+    isHeadAdmin: true,
   })
   mockDb.staffPasswords.set(adminId, 'admin123') // Mock password for demo
 }
