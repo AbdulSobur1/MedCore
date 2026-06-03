@@ -94,15 +94,15 @@ export function PharmacySection() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-border">
+      <div className="flex gap-0 border-b border-slate-200 mb-4">
         {(['prescriptions', 'inventory'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
-                ? 'border-accent text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-teal-600 text-teal-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             {tab === 'prescriptions' ? 'Prescriptions' : 'Inventory'}
@@ -114,8 +114,8 @@ export function PharmacySection() {
       {activeTab === 'prescriptions' && (
         <div className="space-y-6">
           {/* Filters */}
-          <div className="flex gap-4 items-center">
-            <div className="flex-1 relative">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex-1 min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -125,7 +125,7 @@ export function PharmacySection() {
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {['All', 'Pending', 'Ready', 'Dispensed'].map((status) => (
                 <button
                   key={status}
@@ -145,7 +145,7 @@ export function PharmacySection() {
           {/* Prescriptions Table */}
           <div className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[640px]">
                 <thead className="bg-muted border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-6 font-medium text-muted-foreground text-sm">ID</th>
@@ -169,10 +169,10 @@ export function PharmacySection() {
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                             rx.status === 'Dispensed'
-                              ? 'bg-success/20 text-success'
+                              ? 'bg-teal-100 text-teal-800'
                               : rx.status === 'Ready'
-                                ? 'bg-info/20 text-info'
-                                : 'bg-warning/20 text-warning'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-amber-100 text-amber-800'
                           }`}
                         >
                           {rx.status}

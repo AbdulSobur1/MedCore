@@ -58,7 +58,7 @@ export function ReportsSection() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Patients', value: '2,847', color: 'bg-accent' },
           { label: 'Avg. Wait Time', value: '24 min', color: 'bg-info' },
@@ -73,7 +73,7 @@ export function ReportsSection() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Patient Growth */}
         <div className="bg-card border border-border rounded-lg p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Patient Growth Trend</h3>
@@ -128,7 +128,7 @@ export function ReportsSection() {
       <div className="bg-card border border-border rounded-lg p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Department Performance</h3>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[700px]">
             <thead className="border-b border-border">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm">Department</th>

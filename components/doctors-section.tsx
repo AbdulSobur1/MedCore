@@ -81,7 +81,7 @@ export function DoctorsSection() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -92,7 +92,7 @@ export function DoctorsSection() {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {specialties.map((specialty) => (
             <button
               key={specialty}
@@ -110,7 +110,7 @@ export function DoctorsSection() {
       </div>
 
       {/* Doctor Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredDoctors.map((doctor) => (
           <div
             key={doctor.id}

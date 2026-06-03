@@ -4,14 +4,22 @@ import { Users, Calendar, Activity, TrendingUp } from 'lucide-react'
 import { StatCard } from './stat-card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
-const chartData = [
-  { name: 'Mon', patients: 45, appointments: 32 },
-  { name: 'Tue', patients: 52, appointments: 38 },
-  { name: 'Wed', patients: 48, appointments: 35 },
-  { name: 'Thu', patients: 61, appointments: 42 },
-  { name: 'Fri', patients: 55, appointments: 39 },
-  { name: 'Sat', patients: 38, appointments: 28 },
-  { name: 'Sun', patients: 30, appointments: 22 },
+const weeklyData = [
+  { day: 0, patients: 45, appointments: 40 },
+  { day: 1, patients: 52, appointments: 42 },
+  { day: 2, patients: 48, appointments: 38 },
+  { day: 3, patients: 61, appointments: 45 },
+  { day: 4, patients: 55, appointments: 50 },
+  { day: 5, patients: 40, appointments: 35 },
+  { day: 6, patients: 30, appointments: 28 },
+]
+
+const deptData = [
+  { index: 0, dept: 'Cardiology', performance: 82 },
+  { index: 1, dept: 'Pediatrics', performance: 78 },
+  { index: 2, dept: 'Neurology', performance: 65 },
+  { index: 3, dept: 'Surgery', performance: 95 },
+  { index: 4, dept: 'Maternity', performance: 74 },
 ]
 
 const recentPatients = [
@@ -30,7 +38,7 @@ export function DashboardSection() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Total Patients" value="2,847" change="+12% from last month" icon={Users} color="teal" />
         <StatCard
           title="Appointments Today"
@@ -44,38 +52,32 @@ export function DashboardSection() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Line Chart */}
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-          <h3 className="text-sm sm:text-lg font-semibold text-foreground mb-4">Weekly Activity</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3e" />
-              <XAxis stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+        <div className="bg-card border border-border rounded-lg p-4 sm:p-5">
+          <h3 className="font-semibold text-foreground mb-4">Weekly Activity</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={weeklyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="day" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <Tooltip />
               <Line type="monotone" dataKey="patients" stroke="#0d9488" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="appointments" stroke="#6366f1" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="appointments" stroke="#6366f1" strokeWidth={2} dot={false} strokeDasharray="4 4" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Bar Chart */}
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-          <h3 className="text-sm sm:text-lg font-semibold text-foreground mb-4">Department Performance</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={[
-              { name: 'Cardiology', value: 85 },
-              { name: 'Orthopedics', value: 72 },
-              { name: 'Neurology', value: 68 },
-              { name: 'Pediatrics', value: 95 },
-              { name: 'General', value: 78 },
-            ]}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3e" />
-              <XAxis stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-              <Bar dataKey="value" fill="#0d9488" radius={[8, 8, 0, 0]} />
+        <div className="bg-card border border-border rounded-lg p-4 sm:p-5">
+          <h3 className="font-semibold text-foreground mb-4">Department Performance</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={deptData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="index" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <Tooltip />
+              <Bar dataKey="performance" fill="#0d9488" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -85,7 +87,7 @@ export function DashboardSection() {
       <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
         <h3 className="text-sm sm:text-lg font-semibold text-foreground mb-4">Recent Patient Visits</h3>
         <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-xs sm:text-sm">
+          <table className="w-full min-w-[640px] text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-2 sm:py-3 px-3 sm:px-4 font-medium text-muted-foreground">Patient</th>

@@ -7,6 +7,21 @@ import { Check } from 'lucide-react'
 import { createSession, type PatientProfile } from '@/lib/auth'
 import { useAuth } from '@/lib/auth-context'
 
+type RegisterForm = {
+  firstName: string
+  lastName: string
+  dateOfBirth: string
+  gender: PatientProfile['gender']
+  bloodType: string
+  phone: string
+  address: string
+  email: string
+  emergencyName: string
+  emergencyPhone: string
+  insurance: string
+  policyNumber: string
+}
+
 function nextPatientCode(count: number) {
   return `PT-${String(count + 1).padStart(4, '0')}`
 }
@@ -19,8 +34,8 @@ export default function RegisterPage() {
   const [patientId, setPatientId] = useState('')
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const inputs = useRef<Array<HTMLInputElement | null>>([])
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', dateOfBirth: '', gender: 'M' as const, bloodType: 'O+', phone: '', address: '',
+  const [form, setForm] = useState<RegisterForm>({
+    firstName: '', lastName: '', dateOfBirth: '', gender: 'M', bloodType: 'O+', phone: '', address: '',
     email: '', emergencyName: '', emergencyPhone: '', insurance: '', policyNumber: '',
   })
 

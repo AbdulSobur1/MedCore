@@ -278,7 +278,7 @@ export function AdminSection({ isHeadAdmin = false }: { isHeadAdmin?: boolean })
           {/* Staff Table */}
           <div className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[700px]">
                 <thead className="bg-muted border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-6 font-medium text-muted-foreground text-sm">ID</th>

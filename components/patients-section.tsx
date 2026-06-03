@@ -88,7 +88,7 @@ export function PatientsSection() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -99,7 +99,7 @@ export function PatientsSection() {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {['All', 'Active', 'Stable', 'Critical', 'Improving'].map((status) => (
             <button
               key={status}
@@ -121,7 +121,7 @@ export function PatientsSection() {
         <div className="lg:col-span-2">
           <div className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="min-w-[700px] w-full text-sm">
                 <thead className="bg-muted border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-6 font-medium text-muted-foreground text-sm">ID</th>

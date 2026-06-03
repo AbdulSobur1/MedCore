@@ -96,10 +96,11 @@ export function AppointmentsSection() {
 
         {/* Appointments List */}
         <div className="lg:col-span-3">
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3">
             {filteredAppointments.length > 0 ? (
               filteredAppointments.map((appointment) => (
-                <div key={appointment.id} className="bg-card border border-border rounded-lg p-5 hover:shadow-lg transition-shadow">
+                <div key={appointment.id} className="bg-card border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:shadow-lg transition-shadow">
+                  <div className="flex-1">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h4 className="text-sm font-semibold text-foreground">{appointment.patientName}</h4>
@@ -139,6 +140,7 @@ export function AppointmentsSection() {
                   <button className="w-full mt-4 px-3 py-2 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors">
                     View Details
                   </button>
+                  </div>
                 </div>
               ))
             ) : (
