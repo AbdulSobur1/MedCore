@@ -106,7 +106,7 @@ export default function StaffDashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       {/* Sidebar */}
-      <aside className="w-full lg:w-64 bg-sidebar border-b lg:border-b-0 lg:border-r border-border p-4 lg:p-6">
+      <aside className="w-full lg:w-64 bg-sidebar border-b lg:border-b-0 lg:border-r border-white/50 p-4 lg:p-6">
         <div className="space-y-6">
           {/* Header */}
           <div>
@@ -115,7 +115,7 @@ export default function StaffDashboard() {
           </div>
 
           {/* User Info */}
-          <div className="p-4 bg-card border border-border rounded-lg">
+          <div className="p-4 bg-card border border-white/50 rounded-lg">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
             <p className="font-medium text-foreground text-sm">{session.name}</p>
             <p className="text-xs text-muted-foreground mt-1 capitalize">{session.role}</p>
@@ -133,7 +133,7 @@ export default function StaffDashboard() {
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
                     isActive
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-sidebar-accent'
+                      : 'text-foreground hover:bg-white/30'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -146,7 +146,7 @@ export default function StaffDashboard() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-foreground hover:bg-sidebar-accent transition-colors font-medium text-sm"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-foreground hover:bg-white/30 transition-colors font-medium text-sm"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>

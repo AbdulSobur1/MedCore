@@ -7,7 +7,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border sticky top-0 z-10">
+      <header className="border-b border-white/50 sticky top-0 z-10 glass-shell">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
@@ -83,7 +83,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-border text-foreground rounded-lg font-medium hover:bg-muted transition-colors text-sm"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 glass-sm text-foreground rounded-lg font-medium hover:bg-white/40 transition-colors text-sm"
               >
                 Login
               </Link>
@@ -144,7 +144,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border mt-12 sm:mt-20">
+      <footer className="border-t border-white/50 mt-12 sm:mt-20 glass-shell">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
             MedCore - Advanced Hospital Management System
