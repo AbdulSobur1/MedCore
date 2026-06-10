@@ -1,23 +1,32 @@
 'use client'
 
-import { useState } from 'react'
-import { Edit2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Edit2, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import type { PatientProfile } from '@/lib/auth'
+import { toast } from 'sonner'
 
 const vitals = [
   { date: '02 May 2026', bp: '122/78', pulse: '78', temp: '36.8°C', spo2: '98%', by: 'Nurse Ada' },
   { date: '16 Apr 2026', bp: '128/82', pulse: '81', temp: '37.1°C', spo2: '97%', by: 'Nurse Musa' },
+  { date: '14 Mar 2026', bp: '120/76', pulse: '72', temp: '36.6°C', spo2: '99%', by: 'Nurse Chidi' },
 ]
 
 export default function PatientRecordsPage() {
   const { session } = useAuth()
   const [editing, setEditing] = useState(false)
-  const patient = typeof window !== 'undefined'
-    ? (Object.values(JSON.parse(localStorage.getItem('patients') || '{}')) as PatientProfile[]).find((item) => item.patientId === session?.userId)
-    : undefined
+  const [patient, setPatient] = useState<PatientProfile | undefined>()
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const patients = JSON.parse(localStorage.getItem('patients') || '{}') as Record<string, PatientProfile>
+      setPatient(Object.values(patients).find((p) => p.patientId === session?.userId))
+    }
+  }, [session?.userId])
+
   const dob = patient?.dateOfBirth ? new Date(patient.dateOfBirth) : null
   const age = dob ? new Date().getFullYear() - dob.getFullYear() : 'Not recorded'
+
   const fields = [
     ['Full Name', patient?.name || session?.name],
     ['DOB', patient?.dateOfBirth || 'Not recorded'],
@@ -35,58 +44,89 @@ export default function PatientRecordsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Records</h1>
-          <p className="mt-2 text-muted-foreground">Your biodata and clinical summary</p>
+          <h1 className="page-title">My Records</h1>
+          <p className="caption mt-0.5">Your biodata and clinical summary</p>
         </div>
-        <button onClick={() => setEditing(true)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          <Edit2 className="h-4 w-4" /> Edit
+        <button onClick={() => setEditing(true)} className="btn-ghost flex items-center gap-1.5">
+          <Edit2 className="w-3.5 h-3.5" />
+          Edit
         </button>
       </div>
 
-      <section className="rounded-xl border border-slate-100 bg-white p-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {/* Biodata */}
+      <div className="card">
+        <h3 className="section-title mb-4">Personal Information</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {fields.map(([label, value]) => (
-            <div key={label} className="rounded-lg bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">{label}</p>
-              <p className="mt-1 text-sm font-medium text-slate-700">{value}</p>
+            <div key={label as string} className="p-3 rounded-lg bg-[--surface-2]">
+              <p className="label mb-0.5">{label as string}</p>
+              <p className="text-[13px] font-medium text-[--text-1]">{value as string | number}</p>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="rounded-xl border border-slate-100 bg-white p-5">
-        <h3 className="mb-4 font-semibold text-slate-700">Vitals History</h3>
+      {/* Vitals History */}
+      <div className="card">
+        <h3 className="section-title mb-4">Vitals History</h3>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="text-left text-slate-500"><tr><th className="py-2">Date</th><th>BP</th><th>Pulse</th><th>Temp</th><th>SpO₂</th><th>Recorded By</th></tr></thead>
-            <tbody>{vitals.map((row) => <tr key={row.date} className="border-t border-slate-100"><td className="py-3">{row.date}</td><td>{row.bp}</td><td>{row.pulse}</td><td>{row.temp}</td><td>{row.spo2}</td><td>{row.by}</td></tr>)}</tbody>
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr className="divide-x divide-[--border]">
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">Date</th>
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">BP</th>
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">Pulse</th>
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">Temp</th>
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">SpO₂</th>
+                <th className="label text-left px-4 py-3 bg-[--surface-2]">Recorded By</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[--border]">
+              {vitals.map((row) => (
+                <tr key={row.date} className="bg-[--surface] hover:bg-[--surface-2] transition-colors">
+                  <td className="px-4 py-3 text-[13px] text-[--text-1]">{row.date}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.bp}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.pulse}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.temp}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.spo2}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-3]">{row.by}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-      <section className="rounded-xl border border-slate-100 bg-white p-5">
-        <h3 className="mb-4 font-semibold text-slate-700">Allergy / Medical Flags</h3>
+      {/* Medical Flags */}
+      <div className="card">
+        <h3 className="section-title mb-4">Allergy / Medical Flags</h3>
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-medium text-red-700">Penicillin allergy</span>
-          <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-medium text-red-700">Hypertension risk</span>
+          <span className="px-3 py-1.5 rounded-full border border-[--danger-soft] bg-[--danger-soft] text-[12px] font-medium text-[--danger]">Penicillin allergy</span>
+          <span className="px-3 py-1.5 rounded-full border border-[--danger-soft] bg-[--danger-soft] text-[12px] font-medium text-[--danger]">Hypertension risk</span>
         </div>
-      </section>
+      </div>
 
+      {/* Edit modal */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5">
-            <h2 className="text-lg font-semibold">Edit Contact Details</h2>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <input className="rounded-lg border border-slate-200 px-3 py-2 text-sm" defaultValue={patient?.phone} placeholder="Phone" />
-              <input className="rounded-lg border border-slate-200 px-3 py-2 text-sm" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
-              <input className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-lg bg-[--surface] rounded-xl border border-[--border] p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="section-title">Edit Contact Details</h2>
+              <button onClick={() => setEditing(false)} className="p-1 rounded hover:bg-[--surface-2]">
+                <X className="w-4 h-4 text-[--text-3]" />
+              </button>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="rounded-lg border border-slate-200 px-4 py-2 text-sm" onClick={() => setEditing(false)}>Cancel</button>
-              <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" onClick={() => setEditing(false)}>Save</button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input className="input-field" defaultValue={patient?.phone} placeholder="Phone" />
+              <input className="input-field" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
+              <input className="input-field sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setEditing(false)} className="btn-ghost">Cancel</button>
+              <button onClick={() => { setEditing(false); toast.success('Contact details updated!'); }} className="btn-primary">Save</button>
             </div>
           </div>
         </div>

@@ -2,53 +2,123 @@
 
 import { useState } from 'react'
 import { Download, Pill } from 'lucide-react'
+import { toast } from 'sonner'
 
 const prescriptions = [
-  { tab: 'Active', diagnosis: 'Diabetes management', doctor: 'Emily Garcia', date: '02 May 2026', status: 'Ready', drugs: [{ name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', duration: '30 days' }, { name: 'Atorvastatin', dosage: '20mg', frequency: 'Nightly', duration: '30 days' }] },
-  { tab: 'Past', diagnosis: 'Respiratory infection', doctor: 'James Wilson', date: '16 Apr 2026', status: 'Dispensed', drugs: [{ name: 'Amoxicillin', dosage: '500mg', frequency: 'Three times daily', duration: '7 days' }] },
+  {
+    tab: 'Active',
+    diagnosis: 'Diabetes management',
+    doctor: 'Emily Garcia',
+    date: '02 May 2026',
+    status: 'Ready' as const,
+    drugs: [
+      { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', duration: '30 days' },
+      { name: 'Atorvastatin', dosage: '20mg', frequency: 'Nightly', duration: '30 days' },
+    ],
+  },
+  {
+    tab: 'Past',
+    diagnosis: 'Respiratory infection',
+    doctor: 'James Wilson',
+    date: '16 Apr 2026',
+    status: 'Dispensed' as const,
+    drugs: [
+      { name: 'Amoxicillin', dosage: '500mg', frequency: 'Three times daily', duration: '7 days' },
+    ],
+  },
+  {
+    tab: 'Past',
+    diagnosis: 'Hypertension check',
+    doctor: 'Ahmed Hassan',
+    date: '14 Mar 2026',
+    status: 'Dispensed' as const,
+    drugs: [
+      { name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', duration: '30 days' },
+    ],
+  },
 ]
 
 function StatusBadge({ status }: { status: string }) {
-  const cls = status === 'Dispensed' ? 'bg-teal-100 text-teal-800' : 'bg-green-100 text-green-800'
-  return <span className={`rounded-full px-2 py-1 text-xs font-medium ${cls}`}>{status}</span>
+  const styles: Record<string, string> = {
+    'Ready': 'badge-warning',
+    'Dispensed': 'badge-success',
+    'Collected': 'badge-success',
+  }
+  return <span className={`badge ${styles[status] || 'badge-muted'}`}>{status}</span>
 }
 
 export default function PatientPrescriptionsPage() {
   const [tab, setTab] = useState<'Active' | 'Past'>('Active')
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Prescriptions</h1>
-        <p className="mt-2 text-muted-foreground">Medication history and pickup status</p>
+        <h1 className="page-title">Prescriptions</h1>
+        <p className="caption mt-0.5">Medication history and pickup status</p>
       </div>
-      <div className="flex border-b border-slate-200">
-        {(['Active', 'Past'] as const).map((item) => <button key={item} onClick={() => setTab(item)} className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${tab === item ? 'border-teal-600 text-teal-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>{item}</button>)}
-      </div>
-      {prescriptions.filter((item) => item.tab === tab).map((item) => (
-        <div key={item.diagnosis} className="mb-4 rounded-xl border border-slate-100 bg-white p-5">
-          <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <p className="font-semibold text-slate-700">{item.diagnosis}</p>
-              <p className="text-xs text-slate-400">Dr. {item.doctor} · {item.date}</p>
-            </div>
-            <StatusBadge status={item.status} />
-          </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {item.drugs.map((drug) => (
-              <div key={drug.name} className="flex gap-2 rounded-lg bg-slate-50 p-3">
-                <Pill className="mt-0.5 h-4 w-4 shrink-0 text-teal-500" />
-                <div>
-                  <p className="text-sm font-medium">{drug.name} {drug.dosage}</p>
-                  <p className="text-xs text-slate-500">{drug.frequency} · {drug.duration}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button className="mt-3 flex items-center gap-1 text-xs text-teal-600 hover:underline">
-            <Download className="h-3 w-3" /> Download prescription
+
+      {/* Tabs */}
+      <div className="flex border-b border-[--border]">
+        {(['Active', 'Past'] as const).map((item) => (
+          <button
+            key={item}
+            onClick={() => setTab(item)}
+            className={`px-4 pb-3 text-[13px] font-medium border-b-2 transition-colors ${
+              tab === item
+                ? 'border-[--accent] text-[--accent]'
+                : 'border-transparent text-[--text-3] hover:text-[--text-2]'
+            }`}
+          >
+            {item}
           </button>
+        ))}
+      </div>
+
+      {/* Prescriptions list */}
+      {prescriptions.filter((p) => p.tab === tab).length === 0 && (
+        <div className="card py-10 text-center">
+          <div className="w-10 h-10 rounded-full bg-[--accent-soft] flex items-center justify-center mx-auto mb-3">
+            <Pill className="w-5 h-5 text-[--accent]" />
+          </div>
+          <p className="text-[13px] text-[--text-3]">No {tab.toLowerCase()} prescriptions</p>
         </div>
-      ))}
+      )}
+
+      {prescriptions
+        .filter((p) => p.tab === tab)
+        .map((item) => (
+          <div key={item.diagnosis} className="card">
+            <div className="flex items-start justify-between gap-2 mb-4">
+              <div>
+                <p className="text-[13px] font-semibold text-[--text-1]">{item.diagnosis}</p>
+                <p className="caption">Dr. {item.doctor} · {item.date}</p>
+              </div>
+              <StatusBadge status={item.status} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {item.drugs.map((drug) => (
+                <div key={drug.name} className="flex items-center gap-2.5 p-3 rounded-lg bg-[--surface-2]">
+                  <div className="w-7 h-7 rounded-md bg-[--accent-soft] flex items-center justify-center shrink-0">
+                    <Pill className="w-3.5 h-3.5 text-[--accent]" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-medium text-[--text-1]">{drug.name} {drug.dosage}</p>
+                    <p className="caption">{drug.frequency} · {drug.duration}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {tab === 'Active' && (
+              <button
+                onClick={() => toast.success('Prescription download started')}
+                className="mt-3 text-[13px] text-[--accent] font-medium hover:underline flex items-center gap-1"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download prescription
+              </button>
+            )}
+          </div>
+        ))}
     </div>
   )
 }

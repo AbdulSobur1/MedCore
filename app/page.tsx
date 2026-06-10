@@ -20,15 +20,15 @@ export default function Home() {
         router.push(getRoleHome(session.role))
       }
     } else {
-      router.push('/auth/landing')
+      router.push('/login')
     }
   }, [session, isLoading, router])
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">Loading...</p>
+    <div className="min-h-screen bg-[--bg] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Loader className="w-6 h-6 animate-spin text-[--accent]" />
+        <p className="text-[13px] text-[--text-3]">Loading...</p>
       </div>
     </div>
   )

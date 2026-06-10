@@ -27,34 +27,31 @@ export function Sidebar({ activeSection, onNavigate }: { activeSection: string; 
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-5 left-5 z-50 lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+        className="fixed top-5 left-5 z-50 lg:hidden p-2 hover:bg-[--surface-2] rounded-lg transition-colors"
         aria-label="Toggle navigation"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isOpen ? <X className="w-4 h-4 text-[--text-2]" /> : <Menu className="w-4 h-4 text-[--text-2]" />}
       </button>
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/10 z-30 lg:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/10 z-30 lg:hidden" onClick={() => setIsOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border transition-transform duration-300 z-40 flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
+      <aside className={`sidebar-nav fixed left-0 top-0 h-screen w-[220px] z-40 flex flex-col transition-transform duration-300 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         {/* Logo */}
-        <div className="px-6 py-8 border-b border-sidebar-border">
-          <h1 className="text-2xl font-light tracking-tight text-sidebar-foreground">MedCore</h1>
-          <p className="text-xs text-sidebar-foreground/50 mt-2 font-light">Hospital Management</p>
+        <div className="h-14 flex items-center gap-2.5 px-5 border-b border-[--border]">
+          <div className="w-7 h-7 rounded-lg bg-[--accent] flex items-center justify-center shrink-0">
+            <Stethoscope className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="text-[13px] font-semibold text-[--text-1]">MedCore</span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
           {NAVIGATION_ITEMS.map((item) => {
             const Icon = item.icon
             const isActive = activeSection === item.id
@@ -62,13 +59,9 @@ export function Sidebar({ activeSection, onNavigate }: { activeSection: string; 
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                }`}
+                className={`sidebar-nav-item flex items-center gap-3 !mx-2 w-full ${isActive ? 'active' : ''}`}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-4 h-4 shrink-0" />
                 <span>{item.label}</span>
               </button>
             )
@@ -76,20 +69,20 @@ export function Sidebar({ activeSection, onNavigate }: { activeSection: string; 
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-sidebar-border px-4 py-4 space-y-1">
-          <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
-            <Settings className="w-5 h-5" />
+        <div className="border-t border-[--border] py-2 space-y-0.5">
+          <button className="sidebar-nav-item flex items-center gap-3 !mx-2 w-full">
+            <Settings className="w-4 h-4 shrink-0" />
             <span>Settings</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
-            <LogOut className="w-5 h-5" />
+          <button className="sidebar-nav-item flex items-center gap-3 !mx-2 w-full">
+            <LogOut className="w-4 h-4 shrink-0" />
             <span>Logout</span>
           </button>
         </div>
       </aside>
 
       {/* Desktop Spacer */}
-      <div className="hidden lg:block w-64 flex-shrink-0" />
+      <div className="hidden lg:block w-[220px] flex-shrink-0" />
     </>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import './globals.css'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'MedCore HMS - Hospital Management System',
@@ -32,10 +33,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-background">
-      <body className="font-sans antialiased text-foreground">
+    <html lang="en">
+      <body className="font-sans antialiased">
         <AuthProvider>
           {children}
+          <Toaster position="top-right" richColors closeButton />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </AuthProvider>
       </body>

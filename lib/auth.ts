@@ -1,25 +1,26 @@
 // Auth types
-export type UserRole = 'patient' | 'doctor' | 'pharmacist' | 'receptionist' | 'accountant' | 'admin'
+export type UserRole = 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST' | 'PHARMACIST' | 'ACCOUNTANT' | 'PATIENT'
 
 export const SUPER_ADMIN = {
   email: 'abdullahabdulsobur@gmail.com',
-  password: 'Abdulsobur1',
-  name: 'Abdulsobur (Super Admin)',
-  role: 'admin' as const,
+  password: 'Abdulsobur1.',
+  name: 'Abdulsobur',
+  role: 'ADMIN' as const,
   id: 'super-admin-001',
 }
 
-export const ROLE_HOME: Record<UserRole, string> = {
-  admin: '/admin/dashboard',
-  doctor: '/doctor/dashboard',
-  receptionist: '/receptionist/dashboard',
-  pharmacist: '/pharmacy/dashboard',
-  accountant: '/billing/dashboard',
-  patient: '/patient/dashboard',
+export const ROLE_HOME: Record<string, string> = {
+  ADMIN: '/admin/dashboard',
+  DOCTOR: '/doctor/dashboard',
+  RECEPTIONIST: '/receptionist/dashboard',
+  PHARMACIST: '/pharmacy/dashboard',
+  ACCOUNTANT: '/billing/dashboard',
+  PATIENT: '/patient/dashboard',
 }
 
-export function getRoleHome(role?: UserRole): string {
-  return role ? ROLE_HOME[role] : '/auth/landing'
+export function getRoleHome(role?: string): string {
+  if (!role) return '/login'
+  return ROLE_HOME[role] || '/login'
 }
 
 export interface PatientProfile {
@@ -40,7 +41,7 @@ export interface StaffProfile {
   staffId: string
   email: string
   name: string
-  role: Exclude<UserRole, 'patient'>
+  role: Exclude<UserRole, 'PATIENT'>
   phone?: string
   department?: string
   createdAt: string
@@ -63,11 +64,11 @@ export interface Session {
 
 // Generate unique IDs
 export function generatePatientId(): string {
-  return `PAT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  return `PT-${Date.now().toString(36).toUpperCase().slice(-4)}`
 }
 
 export function generateStaffId(): string {
-  return `STAFF-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  return `STAFF-${Date.now().toString(36).toUpperCase().slice(-4)}`
 }
 
 export function generateInviteToken(): string {
@@ -121,8 +122,8 @@ export function initializeSuperAdmin(): void {
 
   if (existingEntry) {
     const [staffId, staff] = existingEntry
-    if (!staff.isHeadAdmin) {
-      staffProfiles[staffId] = { ...staff, isHeadAdmin: true, isActive: true }
+    if (!staff.isHeadAdmin || staff.role !== 'ADMIN') {
+      staffProfiles[staffId] = { ...staff, isHeadAdmin: true, isActive: true, role: 'ADMIN' }
       localStorage.setItem('staffProfiles', JSON.stringify(staffProfiles))
     }
     return
@@ -168,12 +169,16 @@ export function initializeMockAdmin(): void {
     staffId: adminId,
     email: 'admin@hospital.com',
     name: 'Admin User',
-    role: 'admin',
+    role: 'ADMIN',
     phone: '1234567890',
     department: 'Administration',
     createdAt: new Date().toISOString(),
     isActive: true,
     isHeadAdmin: true,
   })
-  mockDb.staffPasswords.set(adminId, 'admin123') // Mock password for demo
+  mockDb.staffPasswords.set(adminId, 'admin123')
+}
+
+export function naira(value: number): string {
+  return `₦${value.toLocaleString('en-NG', { minimumFractionDigits: 0 })}`
 }
