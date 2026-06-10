@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { DataInitializer } from '@/components/data-initializer'
 
 export const metadata: Metadata = {
   title: 'MedCore HMS - Hospital Management System',
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         <AuthProvider>
+          <DataInitializer />
           {children}
           <Toaster position="top-right" richColors closeButton />
           {process.env.NODE_ENV === 'production' && <Analytics />}

@@ -1,26 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Edit2, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import type { PatientProfile } from '@/lib/auth'
 import { toast } from 'sonner'
-
-const vitals = [
-  { date: '02 May 2026', bp: '122/78', pulse: '78', temp: '36.8°C', spo2: '98%', by: 'Nurse Ada' },
-  { date: '16 Apr 2026', bp: '128/82', pulse: '81', temp: '37.1°C', spo2: '97%', by: 'Nurse Musa' },
-  { date: '14 Mar 2026', bp: '120/76', pulse: '72', temp: '36.6°C', spo2: '99%', by: 'Nurse Chidi' },
-]
+import { getVitals, getMedicalFlags } from '@/lib/store'
 
 export default function PatientRecordsPage() {
   const { session } = useAuth()
   const [editing, setEditing] = useState(false)
   const [patient, setPatient] = useState<PatientProfile | undefined>()
+  const [vitals, setVitals] = useState<any[]>([])
+  const [medicalFlags, setMedicalFlags] = useState<any[]>([])
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const emergencyRef = useRef<HTMLInputElement>(null)
+  const addressRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && session?.userId) {
       const patients = JSON.parse(localStorage.getItem('patients') || '{}') as Record<string, PatientProfile>
-      setPatient(Object.values(patients).find((p) => p.patientId === session?.userId))
+      setPatient(Object.values(patients).find((p) => p.patientId === session.userId))
+      setVitals(getVitals(session.userId))
+      setMedicalFlags(getMedicalFlags(session.userId))
     }
   }, [session?.userId])
 
@@ -36,10 +38,8 @@ export default function PatientRecordsPage() {
     ['Phone', patient?.phone || 'Not recorded'],
     ['Address', patient?.address || 'Not recorded'],
     ['Emergency Contact', patient?.emergencyContact || 'Not recorded'],
-    ['Insurance/HMO', 'Not recorded'],
     ['Patient ID', patient?.patientId || session?.userId],
     ['Registration Date', patient?.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'Not recorded'],
-    ['Assigned Doctor', 'Dr. Ahmed Hassan'],
     ['Status', 'Active'],
   ]
 
@@ -56,7 +56,7 @@ export default function PatientRecordsPage() {
         </button>
       </div>
 
-      {/* Biodata */}
+      {/* Biodata - REAL PATIENT DATA */}
       <div className="card">
         <h3 className="section-title mb-4">Personal Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -69,7 +69,7 @@ export default function PatientRecordsPage() {
         </div>
       </div>
 
-      {/* Vitals History */}
+      {/* Vitals History - REAL DATA */}
       <div className="card">
         <h3 className="section-title mb-4">Vitals History</h3>
         <div className="overflow-x-auto">
@@ -85,14 +85,18 @@ export default function PatientRecordsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[--border]">
-              {vitals.map((row) => (
-                <tr key={row.date} className="bg-[--surface] hover:bg-[--surface-2] transition-colors">
+              {vitals.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-[13px] text-[--text-3]">No vitals recorded yet</td>
+                </tr>
+              ) : vitals.slice().reverse().map((row: any) => (
+                <tr key={row.id} className="bg-[--surface] hover:bg-[--surface-2] transition-colors">
                   <td className="px-4 py-3 text-[13px] text-[--text-1]">{row.date}</td>
                   <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.bp}</td>
                   <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.pulse}</td>
                   <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.temp}</td>
                   <td className="px-4 py-3 text-[13px] text-[--text-2]">{row.spo2}</td>
-                  <td className="px-4 py-3 text-[13px] text-[--text-3]">{row.by}</td>
+                  <td className="px-4 py-3 text-[13px] text-[--text-3]">{row.recordedBy}</td>
                 </tr>
               ))}
             </tbody>
@@ -102,11 +106,16 @@ export default function PatientRecordsPage() {
 
       {/* Medical Flags */}
       <div className="card">
-        <h3 className="section-title mb-4">Allergy / Medical Flags</h3>
-        <div className="flex flex-wrap gap-2">
-          <span className="px-3 py-1.5 rounded-full border border-[--danger-soft] bg-[--danger-soft] text-[12px] font-medium text-[--danger]">Penicillin allergy</span>
-          <span className="px-3 py-1.5 rounded-full border border-[--danger-soft] bg-[--danger-soft] text-[12px] font-medium text-[--danger]">Hypertension risk</span>
-        </div>
+        <h3 className="section-title mb-4">Medical Flags</h3>
+        {medicalFlags.length === 0 ? (
+          <p className="text-[13px] text-[--text-3] py-2">No medical flags recorded</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {medicalFlags.map((f: any) => (
+              <span key={f.id} className="px-3 py-1.5 rounded-full border border-[--danger-soft] bg-[--danger-soft] text-[12px] font-medium text-[--danger]">{f.flag}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Edit modal */}
@@ -120,13 +129,26 @@ export default function PatientRecordsPage() {
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input className="input-field" defaultValue={patient?.phone} placeholder="Phone" />
-              <input className="input-field" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
-              <input className="input-field sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
+              <input ref={phoneRef} className="input-field" defaultValue={patient?.phone} placeholder="Phone" />
+              <input ref={emergencyRef} className="input-field" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
+              <input ref={addressRef} className="input-field sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setEditing(false)} className="btn-ghost">Cancel</button>
-              <button onClick={() => { setEditing(false); toast.success('Contact details updated!'); }} className="btn-primary">Save</button>
+              <button onClick={() => {
+                if (!patient || !session?.userId) return
+                const patients = JSON.parse(localStorage.getItem('patients') || '{}') as Record<string, PatientProfile>
+                patients[session.userId] = {
+                  ...patients[session.userId],
+                  phone: phoneRef.current?.value || patient.phone,
+                  emergencyContact: emergencyRef.current?.value || patient.emergencyContact,
+                  address: addressRef.current?.value || patient.address,
+                }
+                localStorage.setItem('patients', JSON.stringify(patients))
+                setPatient(patients[session.userId])
+                setEditing(false)
+                toast.success('Contact details updated!')
+              }} className="btn-primary">Save</button>
             </div>
           </div>
         </div>

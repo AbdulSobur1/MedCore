@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Edit2, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import type { PatientProfile } from '@/lib/auth'
@@ -10,6 +10,9 @@ export default function PatientProfilePage() {
   const { session } = useAuth()
   const [editing, setEditing] = useState(false)
   const [patient, setPatient] = useState<PatientProfile | undefined>()
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const emergencyRef = useRef<HTMLInputElement>(null)
+  const addressRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -19,6 +22,22 @@ export default function PatientProfilePage() {
   }, [session?.userId])
 
   const name = patient?.name || session?.name || 'Patient'
+
+  const handleSave = () => {
+    if (!patient || !session?.userId) return
+    const patients = JSON.parse(localStorage.getItem('patients') || '{}') as Record<string, PatientProfile>
+    const updated = {
+      ...patients[session.userId],
+      phone: phoneRef.current?.value || patient.phone,
+      emergencyContact: emergencyRef.current?.value || patient.emergencyContact,
+      address: addressRef.current?.value || patient.address,
+    }
+    patients[session.userId] = updated
+    localStorage.setItem('patients', JSON.stringify(patients))
+    setPatient(updated)
+    setEditing(false)
+    toast.success('Profile updated successfully!')
+  }
 
   const fields = [
     ['Email', patient?.email || session?.email],
@@ -33,7 +52,6 @@ export default function PatientProfilePage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      {/* Profile header */}
       <div className="card">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-xl bg-[--accent] flex items-center justify-center text-white text-xl font-bold shrink-0">
@@ -51,7 +69,6 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      {/* Profile details */}
       <div className="card">
         <h3 className="section-title mb-4">Personal Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -64,7 +81,6 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      {/* Security */}
       <div className="card">
         <h3 className="section-title mb-4">Security</h3>
         <div className="space-y-3">
@@ -83,7 +99,6 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      {/* Edit modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
           <div className="w-full max-w-lg bg-[--surface] rounded-xl border border-[--border] p-5">
@@ -94,13 +109,13 @@ export default function PatientProfilePage() {
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input className="input-field" defaultValue={patient?.phone} placeholder="Phone" />
-              <input className="input-field" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
-              <input className="input-field sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
+              <input ref={phoneRef} className="input-field" defaultValue={patient?.phone} placeholder="Phone" />
+              <input ref={emergencyRef} className="input-field" defaultValue={patient?.emergencyContact} placeholder="Emergency contact" />
+              <input ref={addressRef} className="input-field sm:col-span-2" defaultValue={patient?.address} placeholder="Address" />
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setEditing(false)} className="btn-ghost">Cancel</button>
-              <button onClick={() => { setEditing(false); toast.success('Profile updated!'); }} className="btn-primary">Save</button>
+              <button onClick={handleSave} className="btn-primary">Save Changes</button>
             </div>
           </div>
         </div>
